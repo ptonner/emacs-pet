@@ -519,8 +519,10 @@ use it."
                  (user-error "`pre-commit' is configured but `%s' is not found in %s" executable bin-dir)))
            (error (pet-report-error err))))
         ((when-let* ((venv (pet-virtualenv-root))
-                     (exec-path (list (concat (file-name-as-directory venv) (pet-system-bin-dir)))))
-           (executable-find executable)))
+		     (default-directory (concat (file-name-as-directory venv) (pet-system-bin-dir)))
+                     (exec-path (list default-directory)))
+	   (let ((tramp-remote-path nil))
+             (executable-find executable (file-remote-p venv)))))
         ((executable-find "pyenv")
          (condition-case err
              (car (process-lines "pyenv" "which" executable))
